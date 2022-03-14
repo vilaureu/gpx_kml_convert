@@ -2,7 +2,7 @@
 <gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1" creator="gpx2kml-lib">
   <metadata>
     <name>Valid</name>
-    <desc>This is a valid, example GPX file.</desc>
+    <desc>This is a valid example GPX file.</desc>
     <author>
       <name>gpx2kml-lib</name>
       <email id="gpx2kml" domain="example.org"></email>
