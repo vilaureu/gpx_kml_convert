@@ -2,8 +2,9 @@ use std::collections::HashMap;
 use std::fmt::Write;
 use std::io::{self, Read};
 
-use gpx::{Metadata, Waypoint};
-use kml::types::{AltitudeMode, Coord, Geometry, Placemark, Point};
+use chrono::{DateTime, Utc};
+use gpx::{Link, Metadata, Route, Waypoint};
+use kml::types::{AltitudeMode, Coord, Geometry, LineString, Placemark, Point};
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
 
 const XML_HEAD: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
@@ -12,6 +13,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("xmlns:atom", "http://www.w3.org/2005/Atom"),
 ];
 const DEFAULT_OPEN: &str = "1";
+const DEFAULT_TESSELLATE: bool = true;
 
 type CoordValue = f64;
 
@@ -23,6 +25,10 @@ pub fn convert(source: impl Read, mut sink: impl io::Write) {
 
     for waypoint in gpx.waypoints {
         elements.push(convert_waypoint(waypoint));
+    }
+
+    for route in gpx.routes {
+        elements.push(convert_route(route));
     }
 
     let document = Kml::Document {
@@ -123,48 +129,109 @@ fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec
 
 fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
     let point = waypoint.point();
+    let geometry = Geometry::Point(Point {
+        coord: Coord {
+            x: point.x(),
+            y: point.y(),
+            z: waypoint.elevation,
+        },
+        altitude_mode: if waypoint.elevation.is_some() {
+            AltitudeMode::Absolute
+        } else {
+            Default::default()
+        },
+        ..Default::default()
+    });
 
+    create_placemark(PlacemarkArgs {
+        name: waypoint.name,
+        links: waypoint.links,
+        description: waypoint.description,
+        comment: waypoint.comment,
+        time: waypoint.time,
+        source: waypoint.source,
+        typ: waypoint._type,
+        geometry,
+    })
+}
+
+fn convert_route(route: Route) -> Kml<CoordValue> {
+    let mut elevation_avail = false;
+    let mut coords = vec![];
+    for waypoint in route.points {
+        let point = waypoint.point();
+        coords.push(Coord {
+            x: point.x(),
+            y: point.y(),
+            z: waypoint.elevation,
+        });
+        elevation_avail |= waypoint.elevation.is_some();
+    }
+
+    let geometry = Geometry::LineString(LineString {
+        tessellate: DEFAULT_TESSELLATE,
+        altitude_mode: if elevation_avail {
+            AltitudeMode::Absolute
+        } else {
+            Default::default()
+        },
+        coords,
+        ..Default::default()
+    });
+
+    create_placemark(PlacemarkArgs {
+        name: route.name,
+        links: route.links,
+        description: route.description,
+        comment: route.comment,
+        time: None,
+        source: route.source,
+        typ: route._type,
+        geometry,
+    })
+}
+
+struct PlacemarkArgs {
+    name: Option<String>,
+    links: Vec<Link>,
+    description: Option<String>,
+    comment: Option<String>,
+    time: Option<DateTime<Utc>>,
+    source: Option<String>,
+    typ: Option<String>,
+    geometry: Geometry,
+}
+
+fn create_placemark(args: PlacemarkArgs) -> Kml<CoordValue> {
     let mut children = vec![];
-    for link in waypoint.links {
+    for link in args.links {
         children.push(atom_link(link.href));
     }
 
-    let mut description = waypoint
+    let mut description = args
         .description
         .map(|mut d| {
             d.push('\n');
             d
         })
         .unwrap_or_default();
-    if let Some(comment) = waypoint.comment {
+    if let Some(comment) = args.comment {
         writeln!(description, "{}", comment).unwrap();
     }
-    if let Some(time) = waypoint.time {
+    if let Some(time) = args.time {
         writeln!(description, "Created {}", time.to_rfc2822()).unwrap();
     }
-    if let Some(source) = waypoint.source {
+    if let Some(source) = args.source {
         writeln!(description, "Source: {}", source).unwrap();
     }
-    if let Some(typ) = waypoint._type {
+    if let Some(typ) = args.typ {
         writeln!(description, "Type: {}", typ).unwrap();
     }
 
     Kml::Placemark(Placemark {
-        name: waypoint.name,
+        name: args.name,
         description: Some(description).filter(|d| !d.is_empty()),
-        geometry: Some(Geometry::Point(Point {
-            coord: Coord {
-                x: point.x(),
-                y: point.y(),
-                z: waypoint.elevation,
-            },
-            altitude_mode: if waypoint.elevation.is_some() {
-                AltitudeMode::Absolute
-            } else {
-                Default::default()
-            },
-            ..Default::default()
-        })),
+        geometry: Some(args.geometry),
         children,
         ..Default::default()
     })

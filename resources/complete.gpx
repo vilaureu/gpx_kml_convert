@@ -35,4 +35,23 @@
     </link>
     <type>Point of Interest</type>
   </wpt>
+  <rte>
+    <name>Route around the Colosseum</name>
+    <cmt>in Rome</cmt>
+    <desc>A bit old, but who cares?</desc>
+    <src>OSM</src>
+    <link href="https://en.wikipedia.org/wiki/Colosseum">
+      <text>Colosseum @ Wikipedia</text>
+      <type>text/html</type>
+    </link>
+    <type>Point of Interest</type>
+    <rtept lat="41.89046" lon="12.49122">
+      <ele>53</ele>
+    </rtept>
+    <rtept lat="41.89065" lon="12.49329">
+      <ele>52</ele>
+    </rtept>
+    <rtept lat="41.88962" lon="12.49265">
+    </rtept>
+  </rte>
 </gpx>
