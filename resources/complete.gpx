@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="gpx2kml-lib">
+  <metadata>
+    <name>Valid</name>
+    <desc>This is a valid example GPX file.</desc>
+    <author>
+      <name>gpx2kml-lib</name>
+      <email id="gpx2kml" domain="example.org"/>
+      <link href="https://example.org/author">
+        <text>Author</text>
+        <type>text/plain</type>
+      </link>
+    </author>
+    <copyright author="vilaureu">
+      <year>2022</year>
+      <license>http://creativecommons.org/publicdomain/zero/1.0/</license>
+    </copyright>
+    <link href="https://example.org/">
+      <text>Example</text>
+      <type>text/html</type>
+    </link>
+    <time>2021-09-18T12:00:00Z</time>
+    <keywords>gpx2kml</keywords>
+  </metadata>
+</gpx>
