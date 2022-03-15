@@ -2,11 +2,9 @@ use std::collections::HashMap;
 use std::fmt::Write;
 use std::io::{self, Read};
 
-use gpx::Metadata;
-use kml::{
-    types::{Coord, Element},
-    Kml, KmlDocument, KmlVersion, KmlWriter,
-};
+use gpx::{Metadata, Waypoint};
+use kml::types::{AltitudeMode, Coord, Geometry, Placemark, Point};
+use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
 
 const XML_HEAD: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
 const NAMESPACES: &[(&str, &str)] = &[
@@ -22,6 +20,10 @@ pub fn convert(source: impl Read, mut sink: impl io::Write) {
 
     let mut elements = vec![simple_kelem("open", DEFAULT_OPEN)];
     push_metadata(gpx.metadata.unwrap_or_default(), gpx.creator, &mut elements);
+
+    for waypoint in gpx.waypoints {
+        elements.push(convert_waypoint(waypoint));
+    }
 
     let document = Kml::Document {
         elements,
@@ -114,8 +116,58 @@ fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec
         }
         description.push('\n');
     }
+    if !description.is_empty() {
+        elements.push(simple_kelem("description", description));
+    }
+}
 
-    elements.push(simple_kelem("description", description));
+fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
+    let point = waypoint.point();
+
+    let mut children = vec![];
+    for link in waypoint.links {
+        children.push(atom_link(link.href));
+    }
+
+    let mut description = waypoint
+        .description
+        .map(|mut d| {
+            d.push('\n');
+            d
+        })
+        .unwrap_or_default();
+    if let Some(comment) = waypoint.comment {
+        writeln!(description, "{}", comment).unwrap();
+    }
+    if let Some(time) = waypoint.time {
+        writeln!(description, "Created {}", time.to_rfc2822()).unwrap();
+    }
+    if let Some(source) = waypoint.source {
+        writeln!(description, "Source: {}", source).unwrap();
+    }
+    if let Some(typ) = waypoint._type {
+        writeln!(description, "Type: {}", typ).unwrap();
+    }
+
+    Kml::Placemark(Placemark {
+        name: waypoint.name,
+        description: Some(description).filter(|d| !d.is_empty()),
+        geometry: Some(Geometry::Point(Point {
+            coord: Coord {
+                x: point.x(),
+                y: point.y(),
+                z: waypoint.elevation,
+            },
+            altitude_mode: if waypoint.elevation.is_some() {
+                AltitudeMode::Absolute
+            } else {
+                Default::default()
+            },
+            ..Default::default()
+        })),
+        children,
+        ..Default::default()
+    })
 }
 
 fn simple_kelem(name: impl Into<String>, content: impl Into<String>) -> Kml<CoordValue> {

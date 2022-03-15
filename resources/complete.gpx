@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="gpx2kml-lib">
   <metadata>
-    <name>Valid</name>
-    <desc>This is a valid example GPX file.</desc>
+    <name>Complete</name>
+    <desc>This is a rather complete, valid example GPX file.</desc>
     <author>
       <name>gpx2kml-lib</name>
       <email id="gpx2kml" domain="example.org"/>
@@ -22,4 +22,17 @@
     <time>2021-09-18T12:00:00Z</time>
     <keywords>gpx2kml</keywords>
   </metadata>
+  <wpt lat="48.858222" lon="2.2945">
+    <ele>30</ele>
+    <time>2021-09-18T13:00:00Z</time>
+    <name>Eiffel Tower</name>
+    <cmt>in Paris</cmt>
+    <desc>large tower, you can't miss it</desc>
+    <src>Wikipedia</src>
+    <link href="https://en.wikipedia.org/wiki/Eiffel_Tower">
+      <text>Eiffel Tower @ Wikipedia</text>
+      <type>text/html</type>
+    </link>
+    <type>Point of Interest</type>
+  </wpt>
 </gpx>
