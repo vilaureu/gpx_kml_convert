@@ -3,8 +3,8 @@ use std::fmt::Write;
 use std::io::{self, Read};
 
 use chrono::{DateTime, Utc};
-use gpx::{Link, Metadata, Route, Waypoint};
-use kml::types::{AltitudeMode, Coord, Geometry, LineString, Placemark, Point};
+use gpx::{Link, Metadata, Route, Track, TrackSegment, Waypoint};
+use kml::types::{AltitudeMode, Coord, Geometry, LineString, MultiGeometry, Placemark, Point};
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
 
 const XML_HEAD: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
@@ -29,6 +29,10 @@ pub fn convert(source: impl Read, mut sink: impl io::Write) {
 
     for route in gpx.routes {
         elements.push(convert_route(route));
+    }
+
+    for track in gpx.tracks {
+        elements.push(convert_track(track));
     }
 
     let document = Kml::Document {
@@ -188,6 +192,53 @@ fn convert_route(route: Route) -> Kml<CoordValue> {
         source: route.source,
         typ: route._type,
         geometry,
+    })
+}
+
+fn convert_track(track: Track) -> Kml {
+    let geometries = track
+        .segments
+        .into_iter()
+        .map(|s| convert_segment(s))
+        .collect();
+
+    create_placemark(PlacemarkArgs {
+        name: track.name,
+        links: track.links,
+        description: track.description,
+        comment: track.comment,
+        time: None,
+        source: track.source,
+        typ: track._type,
+        geometry: Geometry::MultiGeometry(MultiGeometry {
+            geometries,
+            ..Default::default()
+        }),
+    })
+}
+
+fn convert_segment(segment: TrackSegment) -> Geometry {
+    let mut elevation_avail = false;
+    let mut coords = vec![];
+    for waypoint in segment.points {
+        let point = waypoint.point();
+        coords.push(Coord {
+            x: point.x(),
+            y: point.y(),
+            z: waypoint.elevation,
+        });
+        elevation_avail |= waypoint.elevation.is_some();
+    }
+
+    Geometry::LineString(LineString {
+        tessellate: DEFAULT_TESSELLATE,
+        altitude_mode: if elevation_avail {
+            AltitudeMode::Absolute
+        } else {
+            Default::default()
+        },
+        coords,
+        ..Default::default()
     })
 }
 

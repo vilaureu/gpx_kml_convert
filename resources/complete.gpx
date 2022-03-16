@@ -54,4 +54,34 @@
     <rtept lat="41.88962" lon="12.49265">
     </rtept>
   </rte>
+  <trk>
+    <name>Tour through the Alps</name>
+    <cmt>in Europe</cmt>
+    <desc>Really taxing but the view is gorgeous</desc>
+    <src>Google Earth &amp; OSM</src>
+    <link href="https://en.wikipedia.org/wiki/Alps">
+      <text>Alps @ Wikipedia</text>
+      <type>text/html</type>
+    </link>
+    <type>Hiking Tour</type>
+    <trkseg>
+      <trkpt lat="47.062222" lon="12.339722">
+        <ele>2227</ele>
+      </trkpt>
+      <trkpt lat="46.319167" lon="10.916667">
+        <ele>1650</ele>
+      </trkpt>
+      <trkpt lat="46.613333" lon="8.7441667">
+        <ele>2572</ele>
+      </trkpt>
+    </trkseg>
+    <trkseg>
+      <trkpt lat="45.7287" lon="7.1899">
+      </trkpt>
+      <trkpt lat="45.1951" lon="6.8527">
+      </trkpt>
+      <trkpt lat="44.9789" lon="5.9484">
+      </trkpt>
+    </trkseg>
+  </trk>
 </gpx>
