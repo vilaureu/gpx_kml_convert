@@ -131,6 +131,7 @@ dependencies = [
  "chrono",
  "gpx",
  "kml",
+ "thiserror",
 ]
 
 [[package]]

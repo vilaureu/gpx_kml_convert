@@ -8,3 +8,4 @@ publish = false
 gpx = "0.8"
 kml = { version = "0.4.2", default-features = false }
 chrono = "0.4"
+thiserror = "1.0"

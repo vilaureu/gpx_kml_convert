@@ -3,7 +3,8 @@ use std::fmt::Write;
 use std::io::{self, Read};
 
 use chrono::{DateTime, Utc};
-use gpx::{Link, Metadata, Route, Track, TrackSegment, Waypoint};
+use thiserror::Error;
+use gpx::{errors::GpxError, Link, Metadata, Route, Track, TrackSegment, Waypoint};
 use kml::types::{AltitudeMode, Coord, Geometry, LineString, MultiGeometry, Placemark, Point};
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
 
@@ -17,8 +18,16 @@ const DEFAULT_TESSELLATE: bool = true;
 
 type CoordValue = f64;
 
-pub fn convert(source: impl Read, mut sink: impl io::Write) {
-    let gpx = gpx::read(source).unwrap();
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("reading GPX failed: {0}")]
+    Gpx(#[from] GpxError),
+    #[error("writing KML failed: {0}")]
+    Kml(#[from] kml::Error)
+}
+
+pub fn convert(source: impl Read, mut sink: impl io::Write) -> Result<(), Error> {
+    let gpx = gpx::read(source)?;
 
     let mut elements = vec![simple_kelem("open", DEFAULT_OPEN)];
     push_metadata(gpx.metadata.unwrap_or_default(), gpx.creator, &mut elements);
@@ -51,8 +60,10 @@ pub fn convert(source: impl Read, mut sink: impl io::Write) {
 
     writeln!(&mut sink, "{XML_HEAD}").unwrap();
     let mut writer = KmlWriter::from_writer(&mut sink);
-    writer.write(&kml).unwrap();
+    writer.write(&kml)?;
     writeln!(&mut sink).unwrap();
+
+    Ok(())
 }
 
 fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec<Kml<CoordValue>>) {
