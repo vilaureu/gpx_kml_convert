@@ -1,11 +1,11 @@
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
 #[wasm_bindgen]
-pub fn convert(source: &[u8]) -> Box<[u8]> {
+pub fn convert(source: &[u8]) -> Result<Box<[u8]>, JsError> {
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
 
     let mut sink = vec![];
-    gpx2kml::convert(source, &mut sink).unwrap();
-    sink.into_boxed_slice()
+    gpx2kml::convert(source, &mut sink)?;
+    Ok(sink.into_boxed_slice())
 }
