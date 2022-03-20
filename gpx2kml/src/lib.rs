@@ -3,10 +3,10 @@ use std::fmt::Write;
 use std::io::{self, Read};
 
 use chrono::{DateTime, Utc};
-use thiserror::Error;
 use gpx::{errors::GpxError, Link, Metadata, Route, Track, TrackSegment, Waypoint};
 use kml::types::{AltitudeMode, Coord, Geometry, LineString, MultiGeometry, Placemark, Point};
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
+use thiserror::Error;
 
 const XML_HEAD: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
 const NAMESPACES: &[(&str, &str)] = &[
@@ -23,7 +23,7 @@ pub enum Error {
     #[error("reading GPX failed: {0}")]
     Gpx(#[from] GpxError),
     #[error("writing KML failed: {0}")]
-    Kml(#[from] kml::Error)
+    Kml(#[from] kml::Error),
 }
 
 pub fn convert(source: impl Read, mut sink: impl io::Write) -> Result<(), Error> {
@@ -207,11 +207,7 @@ fn convert_route(route: Route) -> Kml<CoordValue> {
 }
 
 fn convert_track(track: Track) -> Kml {
-    let geometries = track
-        .segments
-        .into_iter()
-        .map(|s| convert_segment(s))
-        .collect();
+    let geometries = track.segments.into_iter().map(convert_segment).collect();
 
     create_placemark(PlacemarkArgs {
         name: track.name,
