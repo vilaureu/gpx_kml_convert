@@ -1,6 +1,6 @@
 use std::{fs::File, io::stdout, path::Path};
 
-use gpx2kml::convert;
+use gpx_kml_convert::convert;
 
 const RESOURCES: &str = "./resources/";
 

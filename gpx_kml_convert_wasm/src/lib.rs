@@ -6,6 +6,6 @@ pub fn convert(source: &[u8]) -> Result<Box<[u8]>, JsError> {
     console_error_panic_hook::set_once();
 
     let mut sink = vec![];
-    gpx2kml::convert(source, &mut sink)?;
+    gpx_kml_convert::convert(source, &mut sink)?;
     Ok(sink.into_boxed_slice())
 }

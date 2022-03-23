@@ -1,5 +1,5 @@
 [workspace]
-members = ["gpx2kml", "gpx2kml_wasm"]
+members = ["gpx_kml_convert", "gpx_kml_convert_wasm"]
 
 [profile.release]
 opt-level = "s"

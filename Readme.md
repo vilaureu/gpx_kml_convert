@@ -1,4 +1,4 @@
-# GPX2KML
+# gpx_kml_convert
 
 ## Libraries
 

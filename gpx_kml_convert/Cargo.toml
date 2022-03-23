@@ -1,5 +1,5 @@
 [package]
-name = "gpx2kml"
+name = "gpx_kml_convert"
 version = "0.1.0"
 edition = "2021"
 publish = false

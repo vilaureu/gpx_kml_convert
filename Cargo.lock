@@ -125,7 +125,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gpx2kml"
+name = "gpx_kml_convert"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -135,11 +135,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "gpx2kml_wasm"
+name = "gpx_kml_convert_wasm"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "gpx2kml",
+ "gpx_kml_convert",
  "wasm-bindgen",
 ]
 
