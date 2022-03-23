@@ -15,6 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with gpx_kml_convert. If not, see <https://www.gnu.org/licenses/>.
 
+//! Library for converting from [GPX](https://www.topografix.com/gpx.asp) to
+//! [KML](https://developers.google.com/kml).
+//!
+//! It reads in GPX waypoints, routes, and tours and converts them to KML for
+//! visualization.
+//!
+//! See [`convert`] for information on how to use this library.
+
 use std::collections::HashMap;
 use std::fmt::Write;
 use std::io::{self, Read};
@@ -25,24 +33,60 @@ use kml::types::{AltitudeMode, Coord, Geometry, LineString, MultiGeometry, Place
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
 use thiserror::Error;
 
+/// This line needs to be prepended to the KML output.
 const XML_HEAD: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
+/// Namespace attributes for the `<kml>` tag.
 const NAMESPACES: &[(&str, &str)] = &[
     ("xmlns", "http://www.opengis.net/kml/2.2"),
     ("xmlns:atom", "http://www.w3.org/2005/Atom"),
 ];
+/// Default value for the open attribute of the main KML _Document_.
 const DEFAULT_OPEN: &str = "1";
+/// Default value for tessellating lines in KML.
 const DEFAULT_TESSELLATE: bool = true;
 
+/// Use double precision for coordinate values.
 type CoordValue = f64;
 
+/// Error returned from the [`convert`] function.
 #[derive(Error, Debug)]
 pub enum Error {
+    /// GPX reading failed.
     #[error("reading GPX failed: {0}")]
     Gpx(#[from] GpxError),
+    /// KML writing failed.
     #[error("writing KML failed: {0}")]
     Kml(#[from] kml::Error),
 }
 
+/// Read a GPX file and write a KML file.
+///
+/// A complete GPX file is read from `source`. The converted data is written as
+/// a complete KML file to `sink`.
+///
+/// If an error occurs, the function returns immediately. The `source` and
+/// `sink` might have been modified in this case.
+///
+/// # Example
+/// ```
+/// # use gpx_kml_convert::convert;
+/// #
+/// let source = r#"
+/// <?xml version="1.0" encoding="UTF-8"?>
+/// <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1">
+///     <wpt lat="48.858222" lon="2.2945"><name>Eiffel Tower</name></wpt>
+/// </gpx>
+/// "#;
+/// let mut sink = vec![];
+///
+/// convert(source.as_bytes(), &mut sink).expect("conversion failed");
+///
+/// let kml = String::from_utf8(sink).expect("KML data is not valid UTF-8");
+/// assert!(kml.contains("<kml"));
+/// assert!(kml.contains("2.2945"));
+/// assert!(kml.contains("48.858222"));
+/// assert!(kml.contains("Eiffel Tower"));
+/// ```
 pub fn convert(source: impl Read, mut sink: impl io::Write) -> Result<(), Error> {
     let gpx = gpx::read(source)?;
 
@@ -83,6 +127,9 @@ pub fn convert(source: impl Read, mut sink: impl io::Write) -> Result<(), Error>
     Ok(())
 }
 
+/// Convert the GPX `metadata` and `creator` to KML.
+///
+/// The converted data is pushed to `elements`.
 fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec<Kml<CoordValue>>) {
     if let Some(name) = metadata.name {
         elements.push(simple_kelem("name", name));
@@ -159,6 +206,9 @@ fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec
     }
 }
 
+/// Convert a GPX `waypoint`.
+///
+/// This marks a single point. It is converted to a KML _Point_.
 fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
     let point = waypoint.point();
     let geometry = Geometry::Point(Point {
@@ -187,6 +237,10 @@ fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
     })
 }
 
+/// Convert a GPX `route`.
+///
+/// This is a continuous tour of GPX waypoints. It is converted to a KML
+/// _LineString_.
 fn convert_route(route: Route) -> Kml<CoordValue> {
     let mut elevation_avail = false;
     let mut coords = vec![];
@@ -223,6 +277,11 @@ fn convert_route(route: Route) -> Kml<CoordValue> {
     })
 }
 
+/// Convert a GPX `track`.
+///
+/// This is a structure containing multiple continuous segments of GPX
+/// waypoints. It is converted to a KML _MultiGeometry_. Each segment is
+/// converted with [`convert_segment`].
 fn convert_track(track: Track) -> Kml {
     let geometries = track.segments.into_iter().map(convert_segment).collect();
 
@@ -241,6 +300,7 @@ fn convert_track(track: Track) -> Kml {
     })
 }
 
+/// Convert a single track `segment` to a KML _LineString_.
 fn convert_segment(segment: TrackSegment) -> Geometry {
     let mut elevation_avail = false;
     let mut coords = vec![];
@@ -266,6 +326,7 @@ fn convert_segment(segment: TrackSegment) -> Geometry {
     })
 }
 
+/// Argument for the [`create_placemark`] function.
 struct PlacemarkArgs {
     name: Option<String>,
     links: Vec<Link>,
@@ -273,10 +334,12 @@ struct PlacemarkArgs {
     comment: Option<String>,
     time: Option<DateTime<Utc>>,
     source: Option<String>,
+    /// _type_ attribute in GPX.
     typ: Option<String>,
     geometry: Geometry,
 }
 
+/// Create a KML _Placemark_, which describes displayed geometry.
 fn create_placemark(args: PlacemarkArgs) -> Kml<CoordValue> {
     let mut children = vec![];
     for link in args.links {
@@ -312,10 +375,12 @@ fn create_placemark(args: PlacemarkArgs) -> Kml<CoordValue> {
     })
 }
 
+/// Create a simple KML element with `name` and `content`.
 fn simple_kelem(name: impl Into<String>, content: impl Into<String>) -> Kml<CoordValue> {
     Kml::Element(simple_element(name, content))
 }
 
+/// Create a simple KML element with `name` and `content`.
 fn simple_element(name: impl Into<String>, content: impl Into<String>) -> Element {
     Element {
         name: name.into(),
@@ -324,6 +389,8 @@ fn simple_element(name: impl Into<String>, content: impl Into<String>) -> Elemen
     }
 }
 
+/// Create a link referencing `href` following the
+/// [Atom schema](https://www.w3.org/2005/Atom).
 fn atom_link(href: impl Into<String>) -> Element {
     Element {
         name: "atom:link".to_string(),

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with gpx_kml_convert. If not, see <https://www.gnu.org/licenses/>.
 
+//! This example converts a rather complete GPX example file to KML and outputs
+//! it to _stdout_.
+
 use std::{fs::File, io::stdout, path::Path};
 
 use gpx_kml_convert::convert;
@@ -25,5 +28,5 @@ fn main() {
     let mut source =
         File::open(Path::new(RESOURCES).join("complete.gpx")).expect("complete.gpx not found");
     let mut sink = stdout();
-    convert(&mut source, &mut sink).unwrap()
+    convert(&mut source, &mut sink).unwrap();
 }

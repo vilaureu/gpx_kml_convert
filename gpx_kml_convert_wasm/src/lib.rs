@@ -15,8 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with gpx_kml_convert. If not, see <https://www.gnu.org/licenses/>.
 
+//! This is a WASM wrapper for `gpx_kml_convert`.
+
 use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
+/// This wraps `gpx_kml_convert::convert` for interfacing with JS.
 #[wasm_bindgen]
 pub fn convert(source: &[u8]) -> Result<Box<[u8]>, JsError> {
     #[cfg(feature = "console_error_panic_hook")]

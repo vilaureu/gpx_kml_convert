@@ -1,5 +1,8 @@
 # gpx_kml_convert
 
+This project provides a conversion library from [GPX](https://www.topografix.com/gpx.asp)
+to [KML](https://developers.google.com/kml). It also includes a WASM wrapper.
+
 ## Libraries
 
 This project uses the following libraries:
