@@ -7,8 +7,7 @@ authors = ["vilaureu"]
 license = "AGPL-3.0-or-later"
 
 [dependencies]
-# 0.8.6 breaks time handling: https://github.com/georust/gpx/issues/75
-gpx = "0.8, <=0.8.5"
+# gpx switched to time in version 0.8.6 https://github.com/georust/gpx/pull/65
+gpx = "0.8, >=0.8.6"
 kml = { version = "0.4.2", default-features = false }
-chrono = "0.4"
 thiserror = "1.0"

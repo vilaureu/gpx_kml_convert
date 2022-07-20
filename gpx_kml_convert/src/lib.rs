@@ -27,7 +27,6 @@ use std::collections::HashMap;
 use std::fmt::Write;
 use std::io::{self, Read};
 
-use chrono::{DateTime, Utc};
 use gpx::{errors::GpxError, Link, Metadata, Route, Track, TrackSegment, Waypoint};
 use kml::types::{AltitudeMode, Coord, Geometry, LineString, MultiGeometry, Placemark, Point};
 use kml::{types::Element, Kml, KmlDocument, KmlVersion, KmlWriter};
@@ -172,10 +171,11 @@ fn push_metadata(metadata: Metadata, creator: Option<String>, elements: &mut Vec
             d
         })
         .unwrap_or_default();
-    if metadata.time.is_some() || creator.is_some() {
+    let time = metadata.time.and_then(|t| t.format().ok());
+    if time.is_some() || creator.is_some() {
         description.push_str("Created");
-        if let Some(time) = metadata.time {
-            write!(description, " {}", &time.to_rfc2822()).unwrap();
+        if let Some(time) = time {
+            write!(description, " {}", time).unwrap();
         }
         if let Some(ref creator) = creator {
             write!(description, " by {}", creator).unwrap();
@@ -230,7 +230,7 @@ fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
         links: waypoint.links,
         description: waypoint.description,
         comment: waypoint.comment,
-        time: waypoint.time,
+        time: waypoint.time.and_then(|t| t.format().ok()),
         source: waypoint.source,
         typ: waypoint._type,
         geometry,
@@ -332,7 +332,7 @@ struct PlacemarkArgs {
     links: Vec<Link>,
     description: Option<String>,
     comment: Option<String>,
-    time: Option<DateTime<Utc>>,
+    time: Option<String>,
     source: Option<String>,
     /// _type_ attribute in GPX.
     typ: Option<String>,
@@ -357,7 +357,7 @@ fn create_placemark(args: PlacemarkArgs) -> Kml<CoordValue> {
         writeln!(description, "{}", comment).unwrap();
     }
     if let Some(time) = args.time {
-        writeln!(description, "Created {}", time.to_rfc2822()).unwrap();
+        writeln!(description, "Created {}", time).unwrap();
     }
     if let Some(source) = args.source {
         writeln!(description, "Source: {}", source).unwrap();
