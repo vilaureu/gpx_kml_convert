@@ -8,6 +8,6 @@ license = "AGPL-3.0-or-later"
 
 [dependencies]
 # gpx switched to time in version 0.8.6 https://github.com/georust/gpx/pull/65
-gpx = "0.8, >=0.8.6"
-kml = { version = "0.4.2", default-features = false }
-thiserror = "1.0"
+gpx = "0.8.6"
+kml = { version = "0.6.0", default-features = false }
+thiserror = "1.0.31"
