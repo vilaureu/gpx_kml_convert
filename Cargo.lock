@@ -121,6 +121,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpx_kml_convert_cli"
+version = "0.1.0"
+dependencies = [
+ "gpx_kml_convert",
+]
+
+[[package]]
 name = "gpx_kml_convert_wasm"
 version = "0.1.0"
 dependencies = [

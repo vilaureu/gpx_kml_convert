@@ -1,6 +1,6 @@
 [workspace]
-members = [".", "wasm"]
-default-members = [".", "wasm"]
+members = [".", "wasm", "cli"]
+default-members = [".", "wasm", "cli"]
 
 [package]
 name = "gpx_kml_convert"
