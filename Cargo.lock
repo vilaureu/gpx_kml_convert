@@ -99,9 +99,8 @@ checksum = "221996f774192f0f718773def8201c4ae31f02616a54ccfc2d358bb0e5cefdec"
 
 [[package]]
 name = "gpx"
-version = "0.8.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b03599b85866c88fd0125db7ca7a683be1550724918682c736c7893a399dc5e"
+version = "0.9.0"
+source = "git+https://github.com/georust/gpx?rev=9c251d903faec5783896b0eae6c643031a9dfdef#9c251d903faec5783896b0eae6c643031a9dfdef"
 dependencies = [
  "assert_approx_eq",
  "error-chain",

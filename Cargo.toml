@@ -11,7 +11,8 @@ authors = ["vilaureu"]
 license = "AGPL-3.0-or-later"
 
 [dependencies]
-# gpx switched to time in version 0.8.6 https://github.com/georust/gpx/pull/65
-gpx = "0.8.6"
+# The gpx repository contains yet-unreleased improvements to timestamp parsing:
+# https://github.com/georust/gpx/pull/78
+gpx = { git = "https://github.com/georust/gpx", rev = "9c251d903faec5783896b0eae6c643031a9dfdef" }
 kml = { version = "0.7.0", default-features = false }
 thiserror = "1.0.31"
