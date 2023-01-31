@@ -1,0 +1,45 @@
+name: Test
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/
+            ~/.cargo/.*
+            target/
+          key: "${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}"
+      - name: Check
+        id: check
+        run: cargo check --verbose
+      - name: Test
+        if: "!cancelled() && steps.check.outcome == 'success'"
+        timeout-minutes: 5
+        run: cargo test --verbose
+      - name: Test example
+        if: "!cancelled() && steps.check.outcome == 'success'"
+        timeout-minutes: 5
+        run: cargo run --example complete --verbose
+      - name: Clippy
+        if: "!cancelled() && steps.check.outcome == 'success'"
+        run: cargo clippy --verbose -- --deny=warnings
+      - name: Check formatting
+        if: "!cancelled() && steps.cache.outcome == 'success'"
+        run: cargo fmt --check
