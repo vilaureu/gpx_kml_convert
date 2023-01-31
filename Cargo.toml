@@ -1,5 +1,20 @@
 [workspace]
-members = ["gpx_kml_convert", "gpx_kml_convert_wasm"]
+members = [".", "wasm"]
+default-members = [".", "wasm"]
+
+[package]
+name = "gpx_kml_convert"
+version = "0.1.0"
+edition = "2021"
+publish = false
+authors = ["vilaureu"]
+license = "AGPL-3.0-or-later"
+
+[dependencies]
+# gpx switched to time in version 0.8.6 https://github.com/georust/gpx/pull/65
+gpx = "0.8.6"
+kml = { version = "0.6.0", default-features = false }
+thiserror = "1.0.31"
 
 [profile.release]
 opt-level = "s"
