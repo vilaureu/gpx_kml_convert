@@ -231,7 +231,7 @@ fn convert_waypoint(waypoint: Waypoint) -> Kml<CoordValue> {
         comment: waypoint.comment,
         time: waypoint.time.and_then(|t| t.format().ok()),
         source: waypoint.source,
-        typ: waypoint._type,
+        typ: waypoint.type_,
         geometry,
     })
 }
@@ -271,7 +271,7 @@ fn convert_route(route: Route) -> Kml<CoordValue> {
         comment: route.comment,
         time: None,
         source: route.source,
-        typ: route._type,
+        typ: route.type_,
         geometry,
     })
 }
@@ -291,7 +291,7 @@ fn convert_track(track: Track) -> Kml {
         comment: track.comment,
         time: None,
         source: track.source,
-        typ: track._type,
+        typ: track.type_,
         geometry: Geometry::MultiGeometry(MultiGeometry {
             geometries,
             ..Default::default()
