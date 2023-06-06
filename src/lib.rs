@@ -70,8 +70,7 @@ pub enum Error {
 /// ```
 /// # use gpx_kml_convert::convert;
 /// #
-/// let source = r#"
-/// <?xml version="1.0" encoding="UTF-8"?>
+/// let source = r#"<?xml version="1.0" encoding="UTF-8"?>
 /// <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1">
 ///     <wpt lat="48.858222" lon="2.2945"><name>Eiffel Tower</name></wpt>
 /// </gpx>
